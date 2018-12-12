@@ -72,7 +72,7 @@ public protocol TrimmerViewDelegate: class {
     private let handleWidth: CGFloat = 15
 
     /// The maximum duration allowed for the trimming. Change it before setting the asset, as the asset preview
-    public var maxDuration: Double = 15 {
+    public var maxDuration: Double = Double.greatestFiniteMagnitude {
         didSet {
             assetPreview.maxDuration = maxDuration
         }
@@ -207,7 +207,16 @@ public protocol TrimmerViewDelegate: class {
         leftHandleView.addGestureRecognizer(leftPanGestureRecognizer)
         let rightPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(TrimmerView.handlePanGesture))
         rightHandleView.addGestureRecognizer(rightPanGestureRecognizer)
+		let seekPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(TrimmerView.handleSeekPanGesture))
+		addGestureRecognizer(seekPanGestureRecognizer)
     }
+	
+	@objc func handleSeekPanGesture(_ gestureRecognizer: UIPanGestureRecognizer) {
+		if let newTime = getTime(from: gestureRecognizer.location(in: gestureRecognizer.view).x - leftHandleView.frame.width) {
+			seek(to: newTime)
+			updateSelectedTime(stoppedMoving: false)
+		}
+	}
 
     private func updateMainColor() {
         trimView.layer.borderColor = mainColor.cgColor
@@ -266,6 +275,19 @@ public protocol TrimmerViewDelegate: class {
         let newConstraint = max(min(0, currentRightConstraint + translation.x), maxConstraint)
         rightConstraint?.constant = newConstraint
     }
+	
+	public func setStartTime(_ time: CMTime) {
+		setNeedsLayout()
+		layoutIfNeeded()
+		guard let constant = getPosition(from: time) else { return }
+		leftConstraint?.constant = constant
+		layoutIfNeeded()
+	}
+	
+	public var positionBarIsAtOrPastEnd: Bool {
+		return (rightHandleView.frame.minX - positionBar.frame.maxX) < positionBar.frame.width ||
+			(positionBar.frame.maxX > rightHandleView.frame.minX)
+	}
 
     // MARK: - Asset loading
 

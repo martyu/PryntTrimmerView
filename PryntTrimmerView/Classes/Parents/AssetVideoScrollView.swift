@@ -14,7 +14,7 @@ class AssetVideoScrollView: UIScrollView {
     private var widthConstraint: NSLayoutConstraint?
 
     let contentView = UIView()
-    var maxDuration: Double = 15
+	var maxDuration: Double = Double.greatestFiniteMagnitude
     private var generator: AVAssetImageGenerator?
 
     override init(frame: CGRect) {

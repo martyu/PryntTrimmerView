@@ -40,9 +40,12 @@ public class AVAssetTimeSelector: UIView, UIScrollViewDelegate {
     // MARK: - Asset Preview
 
     func setupAssetPreview() {
-
+		if assetPreview.maxDuration == Double.greatestFiniteMagnitude {
+			assetPreview.isScrollEnabled = false
+		} else {
+			assetPreview.delegate = self
+		}
         assetPreview.translatesAutoresizingMaskIntoConstraints = false
-        assetPreview.delegate = self
         addSubview(assetPreview)
     }
 
